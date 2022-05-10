@@ -62,13 +62,33 @@ public class OrderRepository {
         return query.getResultList();
     }
 
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery(
+                        "select o from Order o "
+                                + "join fetch o.member m "
+                                + "join fetch o.delivery d", Order.class
+                ).setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
     public List<Order> findAllWithMemberDelivery() {
         return em.createQuery(
                 "select o from Order o "
-                + "join fetch o.member m "
-                + "join fetch o.delivery d", Order.class
+                        + "join fetch o.member m "
+                        + "join fetch o.delivery d", Order.class
         ).getResultList();
     }
 
 
+    public List<Order> findAllWithItem() {
+        return em.createQuery("select distinct o from Order o" +
+                " join fetch o.member m" +
+                " join fetch o.delivery d" +
+                " join fetch o.orderItems oi" +
+                " join fetch oi.item i", Order.class).getResultList();
+        // distinct 를 사용하지 않는 경우의 문제점은? OrderItem 마다 같은 OrderId 를 가진 행이 여러개 생기게 된다.
+        // 그러면 성능 저하가 발생할 수 있다.
+        // distinct 를 사용하면 이것을 예방할 수 있다.
+    }
 }
